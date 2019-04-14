@@ -1,3 +1,7 @@
 name: CraftVouchers
 version: 1.0
 main: pw.ollie.craftvouchers.CraftVouchersPlugin
+
+commands:
+  voucher:
+    description: Command for all voucher-related functions
