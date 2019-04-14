@@ -7,21 +7,27 @@ import java.util.Set;
 
 public final class Voucher {
     private final String name;
+    private final String itemTitle;
     private final List<String> instructions;
     private final Set<String> validCodes;
 
-    public Voucher(String name) {
-        this(name, new ArrayList<>());
+    public Voucher(String name, String itemTitle) {
+        this(name, itemTitle, new ArrayList<>());
     }
 
-    public Voucher(String name, List<String> instructions) {
+    public Voucher(String name, String itemTitle, List<String> instructions) {
         this.name = name;
+        this.itemTitle = itemTitle;
         this.instructions = instructions;
         this.validCodes = new HashSet<>();
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getItemTitle() {
+        return itemTitle;
     }
 
     public List<String> getInstructions() {

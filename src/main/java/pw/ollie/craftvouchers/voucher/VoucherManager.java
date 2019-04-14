@@ -36,6 +36,10 @@ public final class VoucherManager {
         return vouchers.get(name);
     }
 
+    public void addVoucher(String name, String itemTitle) {
+        vouchers.put(name, new Voucher(name, itemTitle));
+    }
+
     public void loadVouchers() {
         File dataFolder = plugin.getDataFolder();
         dataFolder.mkdirs();
@@ -51,9 +55,10 @@ public final class VoucherManager {
                 continue;
             }
 
-            String name = voucherSection.getString("name", voucherKey);
-            List<String> instructions = voucherSection.getStringList("instructions");
-            this.vouchers.put(name, new Voucher(name, instructions));
+            String name = voucherSection.getString("Name", voucherKey);
+            String itemTitle = voucherSection.getString("Item-Title", name);
+            List<String> instructions = voucherSection.getStringList("Commands");
+            this.vouchers.put(name, new Voucher(name, itemTitle, instructions));
         }
 
         File codesFile = new File(dataFolder, "codes.bson");
@@ -93,6 +98,7 @@ public final class VoucherManager {
         for (Voucher voucher : vouchers.values()) {
             ConfigurationSection voucherSection = Util.getOrCreateSection(vouchersConfig, voucher.getName());
             voucherSection.set("Name", voucher.getName());
+            voucherSection.set("Item-Title", voucher.getItemTitle());
             voucherSection.set("Commands", voucher.getInstructions());
         }
 

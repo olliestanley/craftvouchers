@@ -11,6 +11,12 @@ public final class Util {
         return result;
     }
 
+    public static String[] subArray(String[] array, int startIndex, int endIndex) {
+        String[] newArray = new String[endIndex - startIndex];
+        System.arraycopy(array, startIndex, newArray, 0, newArray.length);
+        return newArray;
+    }
+
     private Util() {
         throw new UnsupportedOperationException();
     }
