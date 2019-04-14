@@ -1,0 +1,8 @@
+Example:
+  Name: Example
+  Commands:
+    - "give %player 1000 money"
+    - "take %player 1000 money"
+Test:
+  Name: Test
+  Commands: []
