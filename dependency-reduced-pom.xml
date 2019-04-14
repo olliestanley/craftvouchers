@@ -82,7 +82,7 @@
               <relocations>
                 <relocation>
                   <pattern>org.bson</pattern>
-                  <shadedPattern>politics.org.bson</shadedPattern>
+                  <shadedPattern>craftvouchers.org.bson</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>

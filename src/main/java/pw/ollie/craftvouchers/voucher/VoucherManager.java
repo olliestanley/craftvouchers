@@ -1,10 +1,14 @@
 package pw.ollie.craftvouchers.voucher;
 
 import pw.ollie.craftvouchers.CraftVouchersPlugin;
+import pw.ollie.craftvouchers.util.Util;
 
 import org.bson.BSONDecoder;
+import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
+import org.bson.BasicBSONEncoder;
+import org.bson.BasicBSONObject;
 import org.bson.types.BasicBSONList;
 
 import org.bukkit.configuration.ConfigurationSection;
@@ -80,6 +84,73 @@ public final class VoucherManager {
     }
 
     public void saveVouchers() {
-        // todo
+        File dataFolder = plugin.getDataFolder();
+        dataFolder.mkdirs();
+
+        File vouchersConfigFile = new File(dataFolder, "vouchers.yml");
+        YamlConfiguration vouchersConfig = YamlConfiguration.loadConfiguration(vouchersConfigFile);
+
+        for (Voucher voucher : vouchers.values()) {
+            ConfigurationSection voucherSection = Util.getOrCreateSection(vouchersConfig, voucher.getName());
+            voucherSection.set("Name", voucher.getName());
+            voucherSection.set("Commands", voucher.getInstructions());
+        }
+
+        for (String vouchersKey : vouchersConfig.getKeys(false)) {
+            if (!vouchers.containsKey(vouchersKey)) {
+                vouchersConfig.set(vouchersKey, null);
+            }
+        }
+
+        try {
+            vouchersConfig.save(vouchersConfigFile);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Could not save updated vouchers...", e);
+        }
+
+        this.saveCodeData();
+    }
+
+    public void saveCodeData() {
+        File dataFolder = plugin.getDataFolder();
+        File codesFile = new File(dataFolder, "codes.bson");
+        File backupFile = new File(dataFolder, "codes.bson.bck");
+        if (!codesFile.exists()) {
+            try {
+                codesFile.createNewFile();
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "ERROR: Could not save codes data!", e);
+                return;
+            }
+        } else {
+            try {
+                backupFile.delete();
+                Files.copy(codesFile.toPath(), backupFile.toPath());
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "ERROR: Cannot save codes data as backup could not be made!", e);
+                return;
+            }
+        }
+
+        BSONObject bObj = new BasicBSONObject();
+        for (Voucher voucher : vouchers.values()) {
+            BasicBSONList bList = new BasicBSONList();
+            bList.addAll(voucher.getValidCodes());
+            bObj.put(voucher.getName(), bList);
+        }
+
+        BSONEncoder encoder = new BasicBSONEncoder();
+        byte[] data = encoder.encode(bObj);
+        try {
+            Files.write(codesFile.toPath(), data);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "ERROR: Could not save codes data, attempting to restore backup...", e);
+
+            try {
+                Files.copy(backupFile.toPath(), codesFile.toPath());
+            } catch (IOException e1) {
+                plugin.getLogger().log(Level.SEVERE, "Could not restore codes data backup, restore manually...");
+            }
+        }
     }
 }
