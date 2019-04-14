@@ -5,3 +5,7 @@ main: pw.ollie.craftvouchers.CraftVouchersPlugin
 commands:
   voucher:
     description: Command for all voucher-related functions
+
+permissions:
+  craftvouchers.admin:
+    description: Admin command access
