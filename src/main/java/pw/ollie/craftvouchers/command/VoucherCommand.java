@@ -14,6 +14,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Set;
 import java.util.UUID;
 
 public final class VoucherCommand implements CommandExecutor {
@@ -30,7 +31,7 @@ public final class VoucherCommand implements CommandExecutor {
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(ChatColor.RED + "Usage: /voucher <add/create/give> [args...]");
+            sender.sendMessage(ChatColor.RED + "Usage: /voucher <add/create/delete/give/list> [args...]");
             return true;
         }
 
@@ -99,6 +100,31 @@ public final class VoucherCommand implements CommandExecutor {
                 QueuedVoucherCode queued = new QueuedVoucherCode(player.getUniqueId(), voucherName, code);
                 plugin.getVoucherManager().addQueued(queued);
                 sender.sendMessage(ChatColor.GRAY + "The player will be given the voucher when they log in.");
+            }
+        } else if (subcommand.equals("list")) {
+            Set<Voucher> vouchers = plugin.getVoucherManager().getVouchers();
+            if (vouchers.isEmpty()) {
+                sender.sendMessage(ChatColor.RED + "There are currently no vouchers.");
+                return true;
+            }
+
+            StringBuilder message = new StringBuilder(ChatColor.GRAY + "Vouchers:\n");
+            for (Voucher voucher : vouchers) {
+                message.append(voucher.getName()).append(", ");
+            }
+            message.setLength(message.length() - 2);
+            sender.sendMessage(message.toString());
+        } else if (subcommand.equals("delete")) {
+            if (args.length < 2) {
+                sender.sendMessage(ChatColor.RED + "Please specify the name of the voucher.");
+                return true;
+            }
+
+            String voucherName = args[1];
+            if (plugin.getVoucherManager().removeVoucher(voucherName)) {
+                sender.sendMessage(ChatColor.GRAY + "Successfully deleted voucher.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "No voucher with that name exists.");
             }
         } else {
             sender.sendMessage(ChatColor.RED + "Invalid subcommand: " + subcommand + " (valid: add, create, give)");

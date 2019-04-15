@@ -46,16 +46,18 @@ public final class VoucherUseListener implements Listener {
         }
 
         List<String> lore = itemMeta.getLore();
-        if (lore == null || lore.isEmpty()) {
+        if (lore == null || lore.size() < 2) {
             return;
         }
 
-        String firstLine = lore.get(0);
+        String firstLine = lore.get(1);
         if (!voucher.isValidCode(firstLine)) {
             return;
         }
 
         event.getPlayer().sendMessage(ChatColor.GREEN + "Redeemed voucher!");
         voucher.getInstructions().forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
+        voucher.removeCode(firstLine);
+        event.getPlayer().getInventory().remove(itemStack);
     }
 }

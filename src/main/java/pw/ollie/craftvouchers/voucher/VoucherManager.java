@@ -38,7 +38,7 @@ public final class VoucherManager {
     }
 
     public Voucher getVoucher(String name) {
-        return vouchers.get(name);
+        return vouchers.get(name.toLowerCase());
     }
 
     public Voucher getVoucherByItemTitle(String itemTitle) {
@@ -50,8 +50,16 @@ public final class VoucherManager {
         return null;
     }
 
+    public Set<Voucher> getVouchers() {
+        return new HashSet<>(vouchers.values());
+    }
+
     public void addVoucher(String name, String itemTitle) {
-        vouchers.put(name, new Voucher(name, itemTitle));
+        vouchers.put(name.toLowerCase(), new Voucher(name, itemTitle));
+    }
+
+    public boolean removeVoucher(String name) {
+        return vouchers.remove(name.toLowerCase()) != null;
     }
 
     public Set<QueuedVoucherCode> getCodeQueue() {
@@ -84,7 +92,7 @@ public final class VoucherManager {
             String name = voucherSection.getString("Name", voucherKey);
             String itemTitle = voucherSection.getString("Item-Title", name);
             List<String> instructions = voucherSection.getStringList("Commands");
-            this.vouchers.put(name, new Voucher(name, itemTitle, instructions));
+            this.vouchers.put(name.toLowerCase(), new Voucher(name, itemTitle, instructions));
         }
 
         File codesFile = new File(dataFolder, "codes.bson");
