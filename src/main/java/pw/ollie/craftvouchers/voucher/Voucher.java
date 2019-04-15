@@ -1,5 +1,7 @@
 package pw.ollie.craftvouchers.voucher;
 
+import org.bukkit.inventory.ItemStack;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,5 +54,10 @@ public final class Voucher {
 
     public Set<String> getValidCodes() {
         return new HashSet<>(validCodes);
+    }
+
+    public ItemStack getBook(String code) {
+        // todo
+        return null;
     }
 }

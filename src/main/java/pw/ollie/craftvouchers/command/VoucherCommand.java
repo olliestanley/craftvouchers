@@ -2,14 +2,19 @@ package pw.ollie.craftvouchers.command;
 
 import pw.ollie.craftvouchers.CraftVouchersPlugin;
 import pw.ollie.craftvouchers.util.Util;
+import pw.ollie.craftvouchers.voucher.QueuedVoucherCode;
 import pw.ollie.craftvouchers.voucher.Voucher;
 
 import com.google.common.base.Joiner;
 
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public final class VoucherCommand implements CommandExecutor {
     private final CraftVouchersPlugin plugin;
@@ -57,11 +62,44 @@ public final class VoucherCommand implements CommandExecutor {
             plugin.getVoucherManager().addVoucher(name, itemTitle);
             sender.sendMessage(ChatColor.GRAY + "Successfully created new voucher.");
         } else if (subcommand.equals("give")) {
-            // todo
+            if (args.length < 3) {
+                sender.sendMessage(ChatColor.RED + "Please specify the name of the player and of the voucher.");
+                return true;
+            }
+
+            String playerName = args[1];
+            OfflinePlayer player = plugin.getServer().getOfflinePlayer(playerName);
+            if (!player.hasPlayedBefore()) {
+                sender.sendMessage(ChatColor.RED + "That player has never played on the server before.");
+                return true;
+            }
+
+            String voucherName = args[2];
+            Voucher voucher = plugin.getVoucherManager().getVoucher(voucherName);
+            if (voucher == null) {
+                sender.sendMessage(ChatColor.RED + "That is not a valid voucher name.");
+                return true;
+            }
+
+            String code = generateCode();
+            voucher.addCode(code);
+            if (player.isOnline()) {
+                Player online = (Player) player;
+                online.getInventory().addItem(voucher.getBook(code));
+                sender.sendMessage(ChatColor.GRAY + "Successfully gave voucher.");
+            } else {
+                QueuedVoucherCode queued = new QueuedVoucherCode(player.getUniqueId(), voucherName, code);
+                plugin.getVoucherManager().addQueued(queued);
+                sender.sendMessage(ChatColor.GRAY + "The player will be given the voucher when they log in.");
+            }
         } else {
             sender.sendMessage(ChatColor.RED + "Invalid subcommand: " + subcommand + " (valid: add, create, give)");
         }
 
         return true;
+    }
+
+    private String generateCode() {
+        return UUID.randomUUID().toString();
     }
 }

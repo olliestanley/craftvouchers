@@ -13,6 +13,9 @@ public final class VoucherSaveTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        plugin.getVoucherManager().saveCodeData();
+        VoucherManager voucherManager = plugin.getVoucherManager();
+
+        voucherManager.saveCodeData();
+        voucherManager.saveGiveQueue();
     }
 }

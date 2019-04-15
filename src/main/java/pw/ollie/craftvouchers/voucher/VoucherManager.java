@@ -18,18 +18,22 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public final class VoucherManager {
     private final CraftVouchersPlugin plugin;
     private final Map<String, Voucher> vouchers;
+    private final Set<QueuedVoucherCode> queue;
 
     public VoucherManager(CraftVouchersPlugin plugin) {
         this.plugin = plugin;
         this.vouchers = new HashMap<>();
+        this.queue = new HashSet<>();
     }
 
     public Voucher getVoucher(String name) {
@@ -38,6 +42,18 @@ public final class VoucherManager {
 
     public void addVoucher(String name, String itemTitle) {
         vouchers.put(name, new Voucher(name, itemTitle));
+    }
+
+    public Set<QueuedVoucherCode> getCodeQueue() {
+        return new HashSet<>(queue);
+    }
+
+    public void removeQueued(QueuedVoucherCode code) {
+        queue.remove(code);
+    }
+
+    public void addQueued(QueuedVoucherCode code) {
+        queue.add(code);
     }
 
     public void loadVouchers() {
@@ -115,6 +131,7 @@ public final class VoucherManager {
         }
 
         this.saveCodeData();
+        this.saveGiveQueue();
     }
 
     public void saveCodeData() {
@@ -158,5 +175,9 @@ public final class VoucherManager {
                 plugin.getLogger().log(Level.SEVERE, "Could not restore codes data backup, restore manually...");
             }
         }
+    }
+
+    public void saveGiveQueue() {
+        // todo
     }
 }
