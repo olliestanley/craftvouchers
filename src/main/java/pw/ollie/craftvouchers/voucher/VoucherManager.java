@@ -120,15 +120,20 @@ public final class VoucherManager {
 
         try {
             byte[] queueData = Files.readAllBytes(codesFile.toPath());
-            BSONDecoder decoder = new BasicBSONDecoder();
-            BSONObject bObj = decoder.readObject(queueData);
+            if (queueData.length != 0) {
+                BSONDecoder decoder = new BasicBSONDecoder();
+                BSONObject bObj = decoder.readObject(queueData);
 
-            for (String voucherCode : bObj.keySet()) {
-                BasicBSONObject codeObj = (BasicBSONObject) bObj.get(voucherCode);
-                String name = codeObj.getString("name");
-                String code = codeObj.getString("code");
-                UUID playerId = UUID.fromString(codeObj.getString("player"));
-                queue.add(new QueuedVoucherCode(playerId, name, code));
+                for (String voucherCode : bObj.keySet()) {
+                    Object codeObjBase = bObj.get(voucherCode);
+                    if (codeObjBase instanceof BasicBSONObject) {
+                        BasicBSONObject codeObj = (BasicBSONObject) codeObjBase;
+                        String name = codeObj.getString("name");
+                        String code = codeObj.getString("code");
+                        UUID playerId = UUID.fromString(codeObj.getString("player"));
+                        queue.add(new QueuedVoucherCode(playerId, name, code));
+                    }
+                }
             }
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "ERROR: Could not read queue data!", e);
@@ -229,7 +234,7 @@ public final class VoucherManager {
             }
         }
 
-        BSONObject bObj = new BasicBSONObject();
+        BasicBSONObject bObj = new BasicBSONObject();
         for (QueuedVoucherCode queued : queue) {
             BasicBSONObject codeObj = new BasicBSONObject();
             codeObj.put("player", queued.getPlayerId().toString());
@@ -239,7 +244,7 @@ public final class VoucherManager {
         }
 
         BSONEncoder encoder = new BasicBSONEncoder();
-        byte[] data = encoder.encode(bObj);
+        byte[] data = bObj.isEmpty() ? new byte[0] : encoder.encode(bObj);
         try {
             Files.write(queueFile.toPath(), data);
         } catch (IOException e) {
