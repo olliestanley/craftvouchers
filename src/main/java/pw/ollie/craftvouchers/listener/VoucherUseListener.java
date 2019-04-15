@@ -30,7 +30,7 @@ public final class VoucherUseListener implements Listener {
         }
 
         ItemStack itemStack = event.getItem();
-        if (itemStack == null || itemStack.getType() != Material.WRITTEN_BOOK) {
+        if (itemStack == null || itemStack.getType() != Material.BOOK) {
             return;
         }
 
