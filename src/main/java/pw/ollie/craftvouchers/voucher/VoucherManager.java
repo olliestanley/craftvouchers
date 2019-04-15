@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -102,6 +103,27 @@ public final class VoucherManager {
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "ERROR: Could not read codes data!", e);
         }
+
+        File queueFile = new File(dataFolder, "queue.bson");
+        if (!queueFile.exists()) {
+            return;
+        }
+
+        try {
+            byte[] queueData = Files.readAllBytes(codesFile.toPath());
+            BSONDecoder decoder = new BasicBSONDecoder();
+            BSONObject bObj = decoder.readObject(queueData);
+
+            for (String voucherCode : bObj.keySet()) {
+                BasicBSONObject codeObj = (BasicBSONObject) bObj.get(voucherCode);
+                String name = codeObj.getString("name");
+                String code = codeObj.getString("code");
+                UUID playerId = UUID.fromString(codeObj.getString("player"));
+                queue.add(new QueuedVoucherCode(playerId, name, code));
+            }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "ERROR: Could not read queue data!", e);
+        }
     }
 
     public void saveVouchers() {
@@ -178,6 +200,47 @@ public final class VoucherManager {
     }
 
     public void saveGiveQueue() {
-        // todo
+        File dataFolder = plugin.getDataFolder();
+        File queueFile = new File(dataFolder, "queue.bson");
+        File backupFile = new File(dataFolder, "queue.bson.bck");
+        if (!queueFile.exists()) {
+            try {
+                queueFile.createNewFile();
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "ERROR: Could not save queue data!", e);
+                return;
+            }
+        } else {
+            try {
+                backupFile.delete();
+                Files.copy(queueFile.toPath(), backupFile.toPath());
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "ERROR: Cannot save queue data as backup could not be made!", e);
+                return;
+            }
+        }
+
+        BSONObject bObj = new BasicBSONObject();
+        for (QueuedVoucherCode queued : queue) {
+            BasicBSONObject codeObj = new BasicBSONObject();
+            codeObj.put("player", queued.getPlayerId().toString());
+            codeObj.put("voucher", queued.getVoucherName());
+            codeObj.put("code", queued.getCode());
+            bObj.put(queued.getCode(), codeObj);
+        }
+
+        BSONEncoder encoder = new BasicBSONEncoder();
+        byte[] data = encoder.encode(bObj);
+        try {
+            Files.write(queueFile.toPath(), data);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "ERROR: Could not save queue data, attempting to restore backup...", e);
+
+            try {
+                Files.copy(backupFile.toPath(), queueFile.toPath());
+            } catch (IOException e1) {
+                plugin.getLogger().log(Level.SEVERE, "Could not restore queue data backup, restore manually...");
+            }
+        }
     }
 }
