@@ -41,6 +41,15 @@ public final class VoucherManager {
         return vouchers.get(name);
     }
 
+    public Voucher getVoucherByItemTitle(String itemTitle) {
+        for (Voucher voucher : vouchers.values()) {
+            if (voucher.getItemTitle().equals(itemTitle)) {
+                return voucher;
+            }
+        }
+        return null;
+    }
+
     public void addVoucher(String name, String itemTitle) {
         vouchers.put(name, new Voucher(name, itemTitle));
     }

@@ -58,7 +58,15 @@ public final class VoucherCommand implements CommandExecutor {
             }
 
             String name = args[1];
+            if (plugin.getVoucherManager().getVoucher(name) != null) {
+                sender.sendMessage(ChatColor.RED + "There is already a voucher with that name.");
+                return true;
+            }
             String itemTitle = Joiner.on(" ").join(Util.subArray(args, 2, args.length));
+            if (plugin.getVoucherManager().getVoucherByItemTitle(itemTitle) != null) {
+                sender.sendMessage(ChatColor.RED + "There is already a voucher with that item title.");
+                return true;
+            }
             plugin.getVoucherManager().addVoucher(name, itemTitle);
             sender.sendMessage(ChatColor.GRAY + "Successfully created new voucher.");
         } else if (subcommand.equals("give")) {
