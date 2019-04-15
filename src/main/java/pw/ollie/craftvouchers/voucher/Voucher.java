@@ -64,7 +64,7 @@ public final class Voucher {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemTitle));
-        itemMeta.setLore(Arrays.asList(s(ChatColor.RESET) + s(ChatColor.BOLD) + ChatColor.GOLD + "Right click to redeem!", name, s(ChatColor.RESET) + ChatColor.GRAY + code));
+        itemMeta.setLore(Arrays.asList(s(ChatColor.RESET) + s(ChatColor.BOLD) + ChatColor.GOLD + "Right click to redeem!", s(ChatColor.RESET) + ChatColor.GRAY + code));
         item.setItemMeta(itemMeta);
         return item;
     }

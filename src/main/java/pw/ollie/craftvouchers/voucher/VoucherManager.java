@@ -50,6 +50,15 @@ public final class VoucherManager {
         return null;
     }
 
+    public Voucher getVoucherByCode(String code) {
+        for (Voucher voucher : vouchers.values()) {
+            if (voucher.isValidCode(code)) {
+                return voucher;
+            }
+        }
+        return null;
+    }
+
     public Set<Voucher> getVouchers() {
         return new HashSet<>(vouchers.values());
     }
@@ -163,7 +172,7 @@ public final class VoucherManager {
         }
 
         for (String vouchersKey : vouchersConfig.getKeys(false)) {
-            if (!vouchers.containsKey(vouchersKey)) {
+            if (!vouchers.containsKey(vouchersKey.toLowerCase())) {
                 vouchersConfig.set(vouchersKey, null);
             }
         }

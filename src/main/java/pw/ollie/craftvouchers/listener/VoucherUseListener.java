@@ -41,18 +41,16 @@ public final class VoucherUseListener implements Listener {
         }
 
         List<String> lore = itemMeta.getLore();
-
-        if (lore == null || lore.size() < 3) {
+        if (lore == null || lore.size() < 2) {
             return;
         }
 
-        Voucher voucher = plugin.getVoucherManager().getVoucher(lore.get(1));
-        if (voucher == null) {
-            return;
+        String firstLine = lore.get(1);
+        for (ChatColor color : ChatColor.values()) {
+            firstLine = firstLine.replace(color.toString(), "");
         }
-
-        String firstLine = lore.get(2);
-        if (!voucher.isValidCode(firstLine)) {
+        Voucher voucher = plugin.getVoucherManager().getVoucherByCode(firstLine);
+        if (voucher == null || !voucher.isValidCode(firstLine)) {
             return;
         }
 
@@ -61,5 +59,6 @@ public final class VoucherUseListener implements Listener {
         voucher.getInstructions().forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replaceAll("%player%", player.getName())));
         voucher.removeCode(firstLine);
         player.getInventory().remove(itemStack);
+        event.setCancelled(true);
     }
 }
