@@ -1,8 +1,13 @@
 package pw.ollie.craftvouchers.voucher;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +62,16 @@ public final class Voucher {
     }
 
     public ItemStack getBook(String code) {
-        // todo
-        return null;
+        ItemStack item = new ItemStack(Material.WRITTEN_BOOK);
+        ItemMeta itemMeta = item.getItemMeta();
+        if (itemMeta == null) {
+            itemMeta = Bukkit.getItemFactory().getItemMeta(Material.WRITTEN_BOOK);
+        }
+        BookMeta bookMeta = (BookMeta) itemMeta;
+        bookMeta.setTitle(itemTitle);
+        bookMeta.setDisplayName(itemTitle);
+        bookMeta.setLore(Collections.singletonList(code));
+        item.setItemMeta(bookMeta);
+        return item;
     }
 }
