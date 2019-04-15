@@ -6,6 +6,7 @@ import pw.ollie.craftvouchers.voucher.Voucher;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -39,25 +40,26 @@ public final class VoucherUseListener implements Listener {
             return;
         }
 
-        String itemTitle = itemMeta.getDisplayName();
-        Voucher voucher = plugin.getVoucherManager().getVoucherByItemTitle(itemTitle);
+        List<String> lore = itemMeta.getLore();
+
+        if (lore == null || lore.size() < 3) {
+            return;
+        }
+
+        Voucher voucher = plugin.getVoucherManager().getVoucher(lore.get(1));
         if (voucher == null) {
             return;
         }
 
-        List<String> lore = itemMeta.getLore();
-        if (lore == null || lore.size() < 2) {
-            return;
-        }
-
-        String firstLine = lore.get(1);
+        String firstLine = lore.get(2);
         if (!voucher.isValidCode(firstLine)) {
             return;
         }
 
-        event.getPlayer().sendMessage(ChatColor.GREEN + "Redeemed voucher!");
-        voucher.getInstructions().forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
+        Player player = event.getPlayer();
+        player.sendMessage(ChatColor.GREEN + "Redeemed voucher!");
+        voucher.getInstructions().forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replaceAll("%player%", player.getName())));
         voucher.removeCode(firstLine);
-        event.getPlayer().getInventory().remove(itemStack);
+        player.getInventory().remove(itemStack);
     }
 }
